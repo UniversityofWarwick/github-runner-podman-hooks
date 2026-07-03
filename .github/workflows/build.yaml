@@ -1,0 +1,54 @@
+name: CI - Build & Test
+on:
+  pull_request:
+    branches:
+    - '*'
+    paths-ignore:
+    - '**.md'
+  workflow_dispatch:
+
+jobs:
+  format-and-lint:
+    name: Format & Lint Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: node --version && npm --version
+        name: Log Node and npm versions
+      - run: npm ci
+        name: Install dependencies
+      - run: npm run bootstrap
+        name: Bootstrap the packages
+      - run: npm run build-all
+        name: Build packages
+      - run: npm run format-check
+        name: Check formatting
+      - name: Check linter
+        run: |
+          npm run lint
+          git diff --exit-code -- .
+
+  podman-tests:
+    name: Podman Hook Tests
+    runs-on: ubuntu-latest
+    needs: format-and-lint
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: node --version && npm --version
+        name: Log Node and npm versions
+      - run: npm ci
+        name: Install dependencies
+      - run: npm run bootstrap
+        name: Bootstrap the packages
+      - run: npm run build-all
+        name: Build packages
+      - name: Run Docker tests
+        run: npm run test --prefix packages/podman
