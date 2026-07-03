@@ -2,3 +2,5 @@ node_modules/
 lib/
 dist/
 **/tests/_temp/**
+/.vscode/
+.env

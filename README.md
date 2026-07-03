@@ -11,14 +11,14 @@ These hooks will run `podman` as the runner user, so it assumes a rootless setup
 ## Summary of changes made for Podman
 
 * The command being run is now `podman`, naturally
-* Passing environment variables for the container through to `podman` was confusing it, especially for variables like `HOME`, so the values of those are now passed through in the arguments.
-* Podman will not create missing volume sources, but the runners assumes this behaviour, so we will create it if required.
-* If a volume mount is detected where the source is /var/lib/docker.sock, we will translate that to be a Podman socket so that Docker-in-Podman will possibly work. It's recommended to use `podman` directly, though.
-* Volume mounts often need `:z` to be appended so that the correct SELinux labels are added to files. Without this, the container generally can't access a host mount at all.
+* Environment variables were being passed through by passing them into the executable and then listing the keys in the `-e` flags. This was confusing `podman` because it was interpreting the incorrect `HOME` and `PATH`, so the values of those are now passed through in the `-e` arguments.
+* Podman will not create nonexistent volume sources, but the runners assumes this behaviour, so we will create it if required.
+* If a volume mount is detected where the source is /var/lib/docker.sock, we will translate that to be the user-scoped Podman socket so that Docker-in-Podman should work. It's recommended to use `podman` directly, though.
+* SELinux labelling is disabled, which is the second-least secure option but as the runner mounts host directories so extensively, it's probably the only reasonable one that doesn't get into complicated custom labels. Docker doesn't label at all so it's no less secure than using Docker (aside from the fact that you don't have to run as root)
 
 ## Other allowances you may need to make
 
-These don't relate to the hook itself but may affect how you set up the system containing your runner compared to running Docker. Some of these aren't even to do with running jobs as Podman containers but simply running any containers using Podman instead of Docker.
+These don't relate to the hook itself but may affect how you set up the system containing your runner compared to running Docker. Some of these are just generally related to using rootless Podman instead of rootful Docker.
 
 * Add config to `/etc/containers/registries.conf.d` to teach it how to resolve short names, as it won't always assume that the registry is `docker.io` and will fail rather than guess. Alternatively, stop using short names.
 * Podman may re-exec itself with a cut-down PATH and be unable to find tools such as `pasta`. Configure `~/.config/containers/containers.conf` to include locations for all your networking helpers. e.g.:
@@ -37,3 +37,11 @@ npm run build-all
 ```
 
 This should create a file at `packages/podman/dist/index.js` which you can then pass to your runner.
+
+## Usage through NPM
+
+Install `@universityofwarwick/github-runner-podman-hooks` somewhere and update the `.env` file in your `actions-runner` directory to include:
+
+```
+ACTIONS_RUNNER_CONTAINER_HOOKS=/your/path/to/module/packages/podman/dist/index.js
+```
