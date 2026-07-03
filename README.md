@@ -14,7 +14,7 @@ These hooks will run `podman` as the runner user, so it assumes a rootless setup
 * Passing environment variables for the container through to `podman` was confusing it, especially for variables like `HOME`, so the values of those are now passed through in the arguments.
 * Podman will not create missing volume sources, but the runners assumes this behaviour, so we will create it if required.
 * If a volume mount is detected where the source is /var/lib/docker.sock, we will translate that to be a Podman socket so that Docker-in-Podman will possibly work. It's recommended to use `podman` directly, though.
-* Volume mounts often need `:z` to be appended so that the correct SELinux labels are added to files. Without this, the container generally can't access a host mount at all.
+* SELinux labelling is disabled, which is the second-least secure option but as the runner mounts host directories so extensively, it's probably the only reasonable one that doesn't get into complicated custom labels. Docker doesn't label at all so it's no less secure than using Docker (aside from the fact that you don't have to run as root)
 
 ## Other allowances you may need to make
 
