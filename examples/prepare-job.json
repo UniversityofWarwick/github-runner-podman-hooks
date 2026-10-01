@@ -7,7 +7,7 @@
       "workingDirectory": "/__w/repo/repo",
       "systemMountVolumes": [],
       "userMountVolumes": [],
-      "portMappings": ["80:8080"],
+      "portMappings": ["8081:8080"],
       "environmentVariables": {},
       "registry": null
     },

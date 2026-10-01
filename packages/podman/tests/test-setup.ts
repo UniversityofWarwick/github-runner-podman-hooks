@@ -187,7 +187,7 @@ echo "::set-output name=time::$time"`
 
     runContainerStep.args.entryPointArgs[1] = `/__w/_temp/example-script.sh`
     runContainerStep.args.systemMountVolumes = this.systemMountVolumes
-    runContainerStep.args.workingDirectory = this.workingDirectory
+    runContainerStep.args.workingDirectory = this.containerWorkingDirectory
     runContainerStep.args.userMountVolumes = undefined
     runContainerStep.args.registry = null
     return runContainerStep

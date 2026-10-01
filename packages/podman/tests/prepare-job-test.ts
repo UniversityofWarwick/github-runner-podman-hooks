@@ -98,7 +98,7 @@ describe('prepare job', () => {
     const parsedPrepareJobOutput = JSON.parse(prepareJobOutputContent)
 
     const mainContainerPorts = parsedPrepareJobOutput.context.container.ports
-    expect(mainContainerPorts['8080']).toBe('80')
+    expect(mainContainerPorts['8080']).toBe('8081')
 
     const redisService = parsedPrepareJobOutput.context.services.find(
       s => s.image === 'redis'
