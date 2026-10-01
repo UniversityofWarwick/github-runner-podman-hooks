@@ -1,0 +1,15 @@
+{
+  "command": "run_container_step",
+  "responseFile": "",
+  "state": {},
+  "args": {
+    "image": "ubuntu:latest",
+    "entryPoint": "/bin/bash",
+    "entryPointArgs": ["-e", "/__w/_temp/example-script.sh"],
+    "environmentVariables": {},
+    "workingDirectory": "/__w/repo/repo",
+    "systemMountVolumes": [],
+    "userMountVolumes": [],
+    "registry": null
+  }
+}

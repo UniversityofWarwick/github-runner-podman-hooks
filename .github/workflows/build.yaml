@@ -50,5 +50,7 @@ jobs:
         name: Bootstrap the packages
       - run: npm run build-all
         name: Build packages
+      - run: sudo apt-get update && sudo apt-get install --yes uidmap
+        name: Install rootless Podman helpers
       - name: Run Docker tests
         run: npm run test --prefix packages/podman
