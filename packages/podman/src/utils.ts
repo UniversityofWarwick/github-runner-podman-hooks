@@ -62,8 +62,11 @@ export function optionsWithDockerEnvs(
     input: options?.input,
     // Not passing in the requested env to the podman process because it
     // is confused by things like HOME and PATH being changed. Instead we
-    // set the -e flag for the container.
-    env: {}
+    // use the host environment for Podman and set the -e flag for the container.
+    env: {
+      ...(env.HOME ? { HOME: env.HOME } : {}),
+      ...(env.PATH ? { PATH: env.PATH } : {})
+    }
   }
 
   // Set docker envs or overwrite provided ones

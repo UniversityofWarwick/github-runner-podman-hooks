@@ -14,18 +14,27 @@ import { runDockerCommand, RunDockerCommandOptions } from '../utils'
 import { getRunnerLabel } from './constants'
 
 const DOCKER_SOCK_PATH = '/var/run/docker.sock'
-const PODMAN_SOCK_PATH = getuid ? `/run/user/${getuid()}/podman/podman.sock` : (() => { throw new Error('getuid is not available in this environment, cannot determine podman socket path') })()
+const PODMAN_SOCK_PATH = getuid
+  ? `/run/user/${getuid()}/podman/podman.sock`
+  : (() => {
+      throw new Error(
+        'getuid is not available in this environment, cannot determine podman socket path'
+      )
+    })()
 
 // By default, disable SELinux labels since the runner extensively mounts host data
 // into the container with little regard for SELinux. This mirrors Docker's behaviour.
 // You can set this to 0 or false, and it'll probably fail to run things like node
 // which are mounted from the host.
-const PODMAN_SECURITY_LABEL_DISABLED: boolean = 
-  env['PODMAN_SECURITY_LABEL_DISABLED'] !== 'false' && 
+const PODMAN_SECURITY_LABEL_DISABLED: boolean =
+  env['PODMAN_SECURITY_LABEL_DISABLED'] !== 'false' &&
   env['PODMAN_SECURITY_LABEL_DISABLED'] !== '0'
 
 // Turn environment variable args into CLI args
-function setEnvironmentOptions(dockerArgs: string[], args: ContainerInfo): void {
+function setEnvironmentOptions(
+  dockerArgs: string[],
+  args: ContainerInfo
+): void {
   if (args.environmentVariables) {
     for (const [key, value] of Object.entries(args.environmentVariables)) {
       dockerArgs.push('-e', `${key}="${value}"`)
@@ -34,22 +43,27 @@ function setEnvironmentOptions(dockerArgs: string[], args: ContainerInfo): void 
 }
 
 // Turn mount volume args into CLI args
-function setMountVolumeOptions(dockerArgs: string[], args: ContainerInfo): void {
+function setMountVolumeOptions(
+  dockerArgs: string[],
+  args: ContainerInfo
+): void {
   const mountVolumes = [
     ...(args.userMountVolumes || []),
     ...(args.systemMountVolumes || [])
-  ].map(transformVolume);
-  
+  ].map(transformVolume)
+
   // We do this where volumes are set, because that's the only place this matters.
   if (PODMAN_SECURITY_LABEL_DISABLED) {
-    core.debug('Disabling SELinux labels for podman container');
+    core.debug('Disabling SELinux labels for podman container')
     dockerArgs.push('--security-opt', 'label=disable')
   }
 
   for (const mountVolume of mountVolumes) {
     const flags = mountVolume.readOnly ? ':ro' : ''
     dockerArgs.push(`-v`)
-    dockerArgs.push(`${mountVolume.sourceVolumePath}:${mountVolume.targetVolumePath}${flags}`)
+    dockerArgs.push(
+      `${mountVolume.sourceVolumePath}:${mountVolume.targetVolumePath}${flags}`
+    )
 
     // Also create missing sources while we're at it, since Podman won't (reasonably)
     // but GHA assumes it will
@@ -89,7 +103,7 @@ export async function createContainer(
     dockerArgs.push(...args.createOptions.split(' '))
   }
 
-  setEnvironmentOptions(dockerArgs, args);
+  setEnvironmentOptions(dockerArgs, args)
 
   dockerArgs.push('-e', 'GITHUB_ACTIONS=true')
   // Use same behavior as the runner https://github.com/actions/runner/blob/27d9c886ab9a45e0013cb462529ac85d581f8c41/src/Runner.Worker/Container/DockerCommandManager.cs#L150
@@ -97,7 +111,7 @@ export async function createContainer(
     dockerArgs.push('-e', 'CI=true')
   }
 
-  setMountVolumeOptions(dockerArgs, args);
+  setMountVolumeOptions(dockerArgs, args)
 
   if (args.entryPoint) {
     dockerArgs.push(`--entrypoint`)
@@ -133,18 +147,20 @@ export async function createContainer(
  * Whenever the Docker socket path is requested, instead pass it the Podman socket.
  * By default this is the user-level socket for the current UID, but you can override
  * it by setting the ACTIONS_RUNNER_CONTAINER_SOCKET environment variable.
- * 
- * @param mount 
- * @returns 
+ *
+ * @param mount
+ * @returns
  */
 function transformVolume(mount: Mount): Mount {
   if (mount.sourceVolumePath === DOCKER_SOCK_PATH) {
-    core.info(`Transforming mount source path from ${DOCKER_SOCK_PATH} to ${PODMAN_SOCK_PATH}`)
-    mount.sourceVolumePath = env['ACTIONS_RUNNER_CONTAINER_SOCKET'] ?? PODMAN_SOCK_PATH
+    core.info(
+      `Transforming mount source path from ${DOCKER_SOCK_PATH} to ${PODMAN_SOCK_PATH}`
+    )
+    mount.sourceVolumePath =
+      env['ACTIONS_RUNNER_CONTAINER_SOCKET'] ?? PODMAN_SOCK_PATH
   }
   return mount
 }
-
 
 export async function containerPull(
   image: string,
@@ -432,7 +448,9 @@ export async function containerExecStep(
     )
   }
 
-  core.debug(`Executing command in container ${containerId}: ${args.entryPoint} ${args.entryPointArgs.join(' ')}`)
+  core.debug(
+    `Executing command in container ${containerId}: ${args.entryPoint} ${args.entryPointArgs.join(' ')}`
+  )
 
   dockerArgs.push(containerId)
   dockerArgs.push(args.entryPoint)

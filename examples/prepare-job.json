@@ -1,0 +1,23 @@
+{
+  "command": "prepare_job",
+  "responseFile": "",
+  "args": {
+    "container": {
+      "image": "ubuntu:latest",
+      "workingDirectory": "/__w/repo/repo",
+      "systemMountVolumes": [],
+      "userMountVolumes": [],
+      "portMappings": ["8081:8080"],
+      "environmentVariables": {},
+      "registry": null
+    },
+    "services": [
+      {
+        "image": "redis",
+        "contextName": "redis",
+        "portMappings": ["8080:80", "8088:8080"],
+        "registry": null
+      }
+    ]
+  }
+}

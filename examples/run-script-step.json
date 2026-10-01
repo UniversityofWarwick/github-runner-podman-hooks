@@ -1,0 +1,11 @@
+{
+  "command": "run_script_step",
+  "responseFile": "",
+  "state": {},
+  "args": {
+    "entryPoint": "/bin/bash",
+    "entryPointArgs": ["-e", "/__w/_temp/example-script.sh"],
+    "environmentVariables": {},
+    "workingDirectory": "/__w/repo/repo"
+  }
+}
