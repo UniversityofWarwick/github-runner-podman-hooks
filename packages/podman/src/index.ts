@@ -6,7 +6,7 @@ import {
   RunContainerStepArgs,
   RunScriptStepArgs
 } from 'hooklib/lib'
-import { env, exit } from 'process'
+import { exit } from 'process'
 import {
   cleanupJob,
   prepareJob,
